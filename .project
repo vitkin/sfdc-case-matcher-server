@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>sfdc-case-matcher-server</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>com.salesforce.ide.builder.default</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>com.salesforce.ide.builder.upgrade</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>com.salesforce.ide.builder.online</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>com.salesforce.ide.nature.default</nature>
+		<nature>com.salesforce.ide.nature.upgrade</nature>
+		<nature>com.salesforce.ide.nature.inactive</nature>
+		<nature>com.salesforce.ide.nature.online</nature>
+	</natures>
+</projectDescription>

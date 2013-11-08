@@ -1,0 +1,129 @@
+<project name="SFDC Case Matcher Server"
+         default="retrieve"
+         basedir="."
+         xmlns:sf="antlib:com.salesforce"
+         xmlns:contrib="antlib:net.sf.antcontrib">
+  
+  <property file="build.properties"/>
+  <property environment="env"/>
+  
+  <property name="sf.api" value="29.0"/>
+
+  <property name="dl.path"
+            value="C:/Program Files (x86)/salesforce.com/Data Loader/dataloader-29.0.0-uber.jar"/>
+
+  <!-- http://www.salesforce.com/us/developer/docs/daas/salesforce_migration_guide.pdf -->
+  <!-- http://www.salesforce.com/us/developer/docs/api_meta/ -->
+
+  <!-- Retrieve an unpackaged set of metadata from your org -->
+  <!-- The file src/package.xml lists what is to be retrieved -->
+  <target name="retrieve">
+    <!-- Retrieve the contents into another directory -->
+    <sf:retrieve   username="${sf.username}"
+                   password="${sf.password}"
+                   serverurl="${sf.serverurl}"
+                   maxPoll="${sf.maxPoll}"
+                   pollWaitMillis="${sf.pollWaitMillis}"
+                   retrieveTarget="src"
+                   unpackaged="src/package.xml"/>
+  </target>
+  
+  <target name="deploy" depends="deploy-code, upload-data"/>
+  
+  <target name="upload-data" depends="init-dataloader">
+    <java classname="com.salesforce.dataloader.process.ProcessRunner">
+      <sysproperty key="salesforce.config.dir" value="${dl.conf}"/>
+      <arg value="process.name=Insert_Email_To_Case_Matching_Rules"/>
+      <classpath>
+        <pathelement location="${dl.path}"/>
+      </classpath>
+    </java>
+  </target>
+
+  <!-- Shows deploying code & running tests for code in directory -->
+  <target name="deploy-code">
+    <!-- Upload the contents of the "src" directory, running the tests for just 1 class  -->
+    <sf:deploy   username="${sf.username}"
+                 password="${sf.password}"
+                 serverurl="${sf.serverurl}"
+                 maxPoll="${sf.maxPoll}"
+                 pollWaitMillis="${sf.pollWaitMillis}"
+                 deployRoot="src">
+      <runTest>CaseMatcherTests</runTest>
+    </sf:deploy>
+  </target>
+
+  <!-- Removing metadata -->
+  <target name="undeploy">
+    <sf:deploy   username="${sf.username}"
+                 password="${sf.password}"
+                 serverurl="${sf.serverurl}"
+                 maxPoll="${sf.maxPoll}"
+                 pollWaitMillis="${sf.pollWaitMillis}"
+                 deployRoot="undeploy">
+    </sf:deploy>
+  </target>
+
+  <target name="list-custom-object">
+    <sf:listMetadata username="${sf.username}"
+                     password="${sf.password}"
+                     serverurl="${sf.serverurl}"
+                     metadataType="CustomObject"
+                     resultFilePath="list-custom-object.txt"/>
+  </target>
+  
+  <target name="init-dataloader" depends="set-proxy">
+    <property name="dl.conf" value="${basedir}"/>
+    
+    <property name="sfdc.username" value="${sf.username}"/>
+    <encryptProperty name="sfdc.password" value="${sf.password}"/>
+    
+    <property name="sfdc.endpoint" value="${sf.serverurl}/services/Soap/u/${sf.api}"/>
+     
+    <echoproperties destfile="config.properties" prefix="sfdc"/>
+  </target>
+  
+  <target name="probe-proxy">
+    <condition property="proxy.enabled">
+      <and>
+        <isset property="proxy.host"/>
+        <isreachable host="${proxy.host}"/>
+      </and>
+    </condition>
+  </target>
+
+  <target name="set-proxy" depends="probe-proxy" if="proxy.enabled">
+    <property name="proxy.port" value="80"/>
+    <property name="proxy.user" value=""/>
+    <property name="proxy.pass" value=""/>
+    
+    <setproxy proxyhost="${proxy.host}" proxyport="${proxy.port}"
+              proxyuser="${proxy.user}" proxypassword="${proxy.pass}"/>
+    
+    <property name="sfdc.proxyHost" value="${proxy.host}"/>
+    <property name="sfdc.proxyPort" value="${proxy.port}"/>
+    <property name="sfdc.proxyUsername" value="${proxy.user}}"/>
+    
+    <encryptProperty name="sfdc.proxyPassword" value="${proxy.pass}"/>
+  </target>
+  
+  <macrodef name="encryptProperty">
+    <attribute name="name"/>
+    <attribute name="value"/>
+    <sequential>
+      <java classname="com.salesforce.dataloader.security.EncryptionUtil"
+            outputproperty="stdout.@{name}">
+        <arg value="-e"/>
+        <arg value="@{value}"/>
+        <classpath>
+          <pathelement location="${dl.path}"/>
+        </classpath>
+      </java>
+
+      <contrib:propertyregex  property="@{name}" 
+                              input="${stdout.@{name}}" 
+                              regexp="(.*) - (.*)$" 
+                              select="\2" />
+    </sequential>
+  </macrodef>
+</project>

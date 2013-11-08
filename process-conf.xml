@@ -1,0 +1,35 @@
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+	<bean id="Insert_Email_To_Case_Matching_Rules" class="com.salesforce.dataloader.process.ProcessRunner" singleton="false">
+		<description>Created by Dataloader Cliq.</description>
+		<property name="name" value="Insert_Email_To_Case_Matching_Rules"/>
+		<property name="configOverrideMap">
+			<map>
+				<entry key="dataAccess.name" value="data/Insert_Email_To_Case_Matching_Rules.csv"/>
+				<entry key="dataAccess.readUTF8" value="true"/>
+				<entry key="dataAccess.type" value="csvRead"/>
+				<entry key="dataAccess.writeUTF8" value="true"/>
+				<entry key="process.enableExtractStatusOutput" value="true"/>
+				<entry key="process.enableLastRunOutput" value="true"/>
+				<entry key="process.lastRunOutputDirectory" value="log"/>
+				<entry key="process.mappingFile" value="data/Insert_Email_To_Case_Matching_Rules.sdl"/>
+				<entry key="process.operation" value="insert"/>
+				<entry key="process.statusOutputDirectory" value="log"/>
+				<entry key="sfdc.bulkApiCheckStatusInterval" value="5000"/>
+				<entry key="sfdc.bulkApiSerialMode" value="5000"/>
+				<entry key="sfdc.debugMessages" value="false"/>
+				<entry key="sfdc.enableRetries" value="true"/>
+				<entry key="sfdc.entity" value="EmailToCaseMatchingRule__c"/>
+				<entry key="sfdc.extractionRequestSize" value="500"/>
+				<entry key="sfdc.insertNulls" value="false"/>
+				<entry key="sfdc.loadBatchSize" value="100"/>
+				<entry key="sfdc.maxRetries" value="3"/>
+				<entry key="sfdc.minRetrySleepSecs" value="2"/>
+				<entry key="sfdc.noCompression" value="false"/>
+				<!--<entry key="sfdc.proxyNtlmDomain" value=""/>-->
+				<entry key="sfdc.timeoutSecs" value="60"/>
+				<entry key="sfdc.useBulkApi" value="false"/>
+			</map>
+		</property>
+	</bean>
+</beans>

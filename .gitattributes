@@ -1,0 +1,10 @@
+# Set default behaviour, in case users don't have core.autocrlf set.
+* text=auto
+
+# Declare files that will always have LF line endings on checkout.
+*.labels text eol=lf
+*.object text eol=lf
+*.objectTranslation text eol=lf
+destructiveChanges.xml text eol=lf
+package.xml text eol=lf
+*-meta.xml text eol=lf

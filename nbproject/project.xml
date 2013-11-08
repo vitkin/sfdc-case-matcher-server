@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.netbeans.org/ns/project/1">
+  <type>org.netbeans.modules.ant.freeform</type>
+  <configuration>
+    <general-data xmlns="http://www.netbeans.org/ns/freeform-project/1">
+      <name>sfdc-case-matcher-server</name>
+    </general-data>
+    <general-data xmlns="http://www.netbeans.org/ns/freeform-project/2">
+      <!-- Do not use Project Properties customizer when editing this file manually. -->
+      <name>sfdc-case-matcher-server</name>
+      <properties/>
+      <folders>
+        <source-folder>
+          <label>sfdc-case-matcher-server</label>
+          <location>.</location>
+          <encoding>UTF-8</encoding>
+        </source-folder>
+      </folders>
+      <ide-actions>
+        <action name="build">
+          <target>deploy</target>
+        </action>
+        <action name="clean">
+          <target>undeploy</target>
+        </action>
+        <action name="run">
+          <target>retrieve</target>
+        </action>
+        <action name="test">
+          <target>listCustomObject</target>
+        </action>
+        <action name="rebuild">
+          <target>undeploy</target>
+          <target>deploy</target>
+        </action>
+      </ide-actions>
+      <view>
+        <items>
+          <source-file>
+            <location>build.xml</location>
+          </source-file>
+        </items>
+        <context-menu>
+          <ide-action name="build"/>
+          <ide-action name="rebuild"/>
+          <ide-action name="clean"/>
+          <ide-action name="run"/>
+          <ide-action name="test"/>
+        </context-menu>
+      </view>
+      <subprojects/>
+    </general-data>
+    <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/1"/>
+  </configuration>
+</project>

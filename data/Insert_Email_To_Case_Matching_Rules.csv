@@ -1,0 +1,6 @@
+"Name","Regex","Subject","Body","Filter"
+"Any Integer","(?s).*?(\d+).*","true","false","false"
+"Case Thread Id","ref:[0-9a-zA-Z]{4,15}\.[0-9a-zA-Z]{4,15}:ref","true","true","true"
+"ORA-#","ORA-\d+","true","false","true"
+"Year (2010-2019)","(^|\D)201\d(\D|$)","true","false","true"
+"Year 2000 - 2009","(^|\D)200\d(\D|$)","true","false","true"
