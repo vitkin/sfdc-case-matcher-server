@@ -5,14 +5,14 @@
 		<property name="name" value="Insert_Email_To_Case_Matching_Rules"/>
 		<property name="configOverrideMap">
 			<map>
-				<entry key="dataAccess.name" value="data/Insert_Email_To_Case_Matching_Rules.csv"/>
+				<entry key="dataAccess.name" value="data/csv/Insert_Email_To_Case_Matching_Rules.csv"/>
 				<entry key="dataAccess.readUTF8" value="true"/>
 				<entry key="dataAccess.type" value="csvRead"/>
 				<entry key="dataAccess.writeUTF8" value="true"/>
 				<entry key="process.enableExtractStatusOutput" value="true"/>
 				<entry key="process.enableLastRunOutput" value="true"/>
 				<entry key="process.lastRunOutputDirectory" value="log"/>
-				<entry key="process.mappingFile" value="data/Insert_Email_To_Case_Matching_Rules.sdl"/>
+				<entry key="process.mappingFile" value="data/csv/Insert_Email_To_Case_Matching_Rules.sdl"/>
 				<entry key="process.operation" value="insert"/>
 				<entry key="process.statusOutputDirectory" value="log"/>
 				<entry key="sfdc.bulkApiCheckStatusInterval" value="5000"/>

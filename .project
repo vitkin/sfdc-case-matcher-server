@@ -26,5 +26,6 @@
 		<nature>com.salesforce.ide.nature.upgrade</nature>
 		<nature>com.salesforce.ide.nature.inactive</nature>
 		<nature>com.salesforce.ide.nature.online</nature>
+		<nature>org.apache.ivyde.eclipse.ivynature</nature>
 	</natures>
 </projectDescription>

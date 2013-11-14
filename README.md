@@ -1,17 +1,61 @@
 ## Prerequisites
 
-* [Ant-Contrib 1.0b2](http://ant-contrib.sourceforge.net/)
-  You can just place `ant-contrib.jar` under `%USERPROFILE%\.ant\lib\`.
+This project is based on Apache Ant 1.7 and Apache Ivy 2.3.
+The dependency to Apache Ivy is standalone meaning that Apache Ivy will be
+automatically installed under '.ivy2' under your user home folder.
+
+### Maven dependencies
+
+The Apache Ivy based dependencies are actually Apache Maven artifacts:
+
+#### Not publicly available
+
+You may need to either download or compile those JARs and place or deploy them
+to an accessible Maven repository defined in your 'ivysettings.xml' at the right
+location based on their coordinates.
 
 * [Force.com Migration Tool](http://www.salesforce.com/us/developer/docs/daas/Content/forcemigrationtool_install.htm)
-  You can just place `ant-salesforce.jar` under `%USERPROFILE%\.ant\lib\`.
+  * **Coordinates:** com.salesforce:ant-salesforce:24.0.0
 
-* [Force.com Data Loader](http://wiki.developerforce.com/page/Data_Loader)
-  * [Download](https://na1.salesforce.com/dwnld/DataLoader/ApexDataLoader.exe)
-  * [Source](https://github.com/forcedotcom/dataloader)
-  * [Using from CLI](http://wiki.apexdevnet.com/page/Using_Data_Loader_from_the_command_line)
+  * **Note:** You just need to download the 'ant-salesforce.jar', rename and
+    place it at the right location in the defined Maven repository.
 
-#### Optional:
+* [Force.com Data Loader 29.0.0](http://wiki.developerforce.com/page/Data_Loader)
+  * **Coordinates:** com.force:dataloader:29.0.0
+
+  * **Note:** That JAR needs to be compiled from the sources available on
+    GitHub and despite it requires the below Eclipse artifacts, it is much 
+    smaller than the downloadable "uber" version that includes unnecessary
+    3rd-party dependencies   
+    Then deploy it to the defined Maven repository.
+
+  * **Details:**
+    - [Sources on GitHub](https://github.com/forcedotcom/dataloader)
+    - [Download the "uber" version](https://na1.salesforce.com/dwnld/DataLoader/ApexDataLoader.exe)
+    - [Using from CLI](http://wiki.apexdevnet.com/page/Using_Data_Loader_from_the_command_line)
+
+* [Eclipse dependencies](https://github.com/forcedotcom/dataloader/tree/29.0.0/local-proj-repo/org/eclipse)
+  * **Coordinates:**
+    - **core.commands:** org.eclipse:core.commands:3.6.1.v20120521-2329
+    - **equinox.common:** org.eclipse:equinox.common:3.6.100.v20120522-1841
+    - **jface:** org.eclipse:jface:3.8.0.v20120521-2329
+
+  * **Note:** You just need to download those JARs and place them at the right
+    location in the defined Maven repository.  
+    You may also find them [here](https://swt-repo.googlecode.com/svn/repo/)
+    but with different coordinates.
+
+#### Publicly available
+
+* [Ant-Contrib 1.0b3](http://ant-contrib.sourceforge.net/)
+  * **Coordinates:** com.force:dataloader:29.0.0
+
+* [Force.com Partner WSC](https://github.com/forcedotcom/wsc)
+  * **Coordinates:**
+    - **Partner API:** com.force.api:force-partner-api:29.0.0
+    - **WSC:** com.force.api:force-wsc:29.0.0
+
+### Optional:
 
 * [Force.com IDE](http://wiki.developerforce.com/page/Force.com_IDE_Installation)
 * [Salesforce Data Loader CLI quickstart 2.3.0 beta](http://code.google.com/p/dataloadercliq/)
@@ -24,9 +68,6 @@ follow:
 ```INI
 # build.properties
 #
-
-# Specify your Force.com DataLoader installation path
-#dl.path = C:/Program Files (x86)/salesforce.com/Data Loader/dataloader-29.0.0-uber.jar
 
 # Specify the login credentials for the desired Salesforce organization
 

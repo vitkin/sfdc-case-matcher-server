@@ -1,8 +1,8 @@
 # Created by http://gitignore.io
 
 ### Customs ###
-/log/
-/config.properties
+log/
+config.properties
 
 ### NetBeans ###
 /nbproject/private/
@@ -60,3 +60,4 @@ $RECYCLE.BIN/
 !.gitignore
 !.git*
 *~
+/test/
