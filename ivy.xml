@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module version="2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
+  <info organisation="vitkin.sfdc"
+        module="sfdc-case-matcher-server"
+        revision="1.0"/>
+  <configurations defaultconfmapping="*->default">
+    <conf name="dataloader"
+          visibility="private"  
+          description="only provide Force.com dataloader API"/>
+    <conf name="ant-contrib"
+          visibility="private"
+          description="only provide ant-contrib tasks"/>
+    <conf name="ant-salesforce"
+          visibility="private"
+          description="only provide Force.com migration tool tasks"/>
+  </configurations>
+  <dependencies>
+    <dependency org="ant-contrib" 
+                name="ant-contrib" 
+                rev="1.0b3"
+                conf="ant-contrib"/>
+    <dependency org="com.force" 
+                name="dataloader" 
+                rev="29.0.0" 
+                conf="dataloader"/>
+    <dependency org="org.eclipse.swt" 
+                name="org.eclipse.swt.win32.win32.x86" 
+                rev="4.3" 
+                conf="dataloader"/>
+    <dependency org="com.salesforce" 
+                name="ant-salesforce" 
+                rev="24.0.0"
+                conf="ant-salesforce"/>
+  </dependencies>
+</ivy-module>

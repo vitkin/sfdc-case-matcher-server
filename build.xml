@@ -8,198 +8,181 @@
          xmlns:sf="antlib:com.salesforce"
          xmlns:contrib="antlib:net.sf.antcontrib">
 
-    <property file="build.properties"/>
-    <property environment="env"/>
+  <property file="build.properties"/>
+  <property environment="env"/>
 
-    <property name="sf.api" value="29.0"/>
+  <property name="sf.api" value="29.0"/>
 
-    <property name="m2.repo.url" value="http://repo2.maven.org/maven2"/>
+  <property name="m2.repo.url" value="http://repo2.maven.org/maven2"/>
 
-    <property name="ivy.install.version" value="2.3.0"/>
+  <property name="ivy.install.version" value="2.3.0"/>
 
-    <condition property="ivy.home" value="${env.IVY_HOME}">
-        <isset property="env.IVY_HOME"/>
+  <condition property="ivy.home" value="${env.IVY_HOME}">
+    <isset property="env.IVY_HOME"/>
+  </condition>
+
+  <property name="ivy.home" value="${user.home}/.ivy2"/>
+  <property name="ivy.settings.file" value="${ivy.home}/ivysettings.xml"/>
+  <property name="ivy.jar.dir" value="${ivy.home}/lib"/>
+  <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar"/>
+
+  <target name="-download-ivy" unless="offline">
+    <mkdir dir="${ivy.home}"/>
+    <mkdir dir="${ivy.jar.dir}"/>
+    <!-- download Ivy from web site so that it can be used even without any special installation -->
+    <get src="${m2.repo.url}/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
+         dest="${ivy.jar.file}" usetimestamp="true"/>
+  </target>
+
+  <target name="-init-contrib" depends="-init-ivy">
+    <ivy:cachepath  conf="ant-contrib"
+                    pathid="classpath.ant-contrib"/>
+
+    <taskdef resource="net/sf/antcontrib/antlib.xml"
+             uri="antlib:net.sf.antcontrib"
+             classpathref="classpath.ant-contrib"/>
+  </target>
+
+  <target name="-init-dataloader" depends="-init-ivy">
+    <ivy:cachepath  conf="dataloader"
+                    pathid="classpath.dataloader"/>
+  </target>
+
+  <target name="-init-ivy" depends="-download-ivy">
+    <!--
+    Try to load ivy here from ivy home, in case the user has not already dropped
+    it into ant's lib dir (note that the latter copy will always take precedence)
+    We will not fail as long as local lib dir exists (it may be empty) and
+    ivy is in at least one of ant's lib dir or the local lib dir.
+    -->
+    <path id="classpath.ivy">
+      <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
+    </path>
+
+    <taskdef resource="org/apache/ivy/ant/antlib.xml"
+             uri="antlib:org.apache.ivy.ant"
+             classpathref="classpath.ivy"/>
+  </target>
+
+  <target name="-init-migration-tool" depends="-init-ivy">
+    <ivy:cachepath  conf="ant-salesforce"
+                    pathid="classpath.ant-salesforce"/>
+
+    <taskdef resource="com/salesforce/antlib.xml"
+             uri="antlib:com.salesforce" 
+             classpathref="classpath.ant-salesforce"/>
+  </target>
+
+  <target name="-init-load" depends="-init-dataloader, -init-contrib, -set-proxy">
+    <property name="sf.dataloader.conf" value="${basedir}/data/conf"/>
+
+    <property name="sfdc.username" value="${sf.username}"/>
+    <encryptProperty name="sfdc.password" value="${sf.password}"/>
+
+    <property name="sfdc.endpoint" value="${sf.serverurl}/services/Soap/u/${sf.api}"/>
+
+    <echoproperties destfile="${sf.dataloader.conf}/config.properties" prefix="sfdc"/>
+  </target>
+
+  <target name="-probe-proxy">
+    <condition property="proxy.enabled">
+      <and>
+        <isset property="proxy.host"/>
+        <isreachable host="${proxy.host}"/>
+      </and>
     </condition>
+  </target>
 
-    <property name="ivy.home" value="${user.home}/.ivy2"/>
-    <property name="ivy.jar.dir" value="${ivy.home}/lib"/>
-    <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar"/>
+  <target name="-set-proxy" depends="-init-dataloader, -init-contrib, -probe-proxy" if="proxy.enabled">
+    <property name="proxy.port" value="80"/>
+    <property name="proxy.user" value=""/>
+    <property name="proxy.pass" value=""/>
 
-    <target name="-download-ivy" unless="offline">
-        <mkdir dir="${ivy.home}"/>
-        <mkdir dir="${ivy.jar.dir}"/>
-        <!-- download Ivy from web site so that it can be used even without any special installation -->
-        <get src="${m2.repo.url}/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
-             dest="${ivy.jar.file}" usetimestamp="true"/>
-    </target>
-    
-    <target name="-init-contrib" depends="-init-ivy">
-        <ivy:cachepath  organisation="ant-contrib"
-                        module="ant-contrib"
-                        revision="1.0b3" 
-                        pathid="classpath.ant-contrib" 
-                        inline="true"/>
+    <setproxy proxyhost="${proxy.host}" proxyport="${proxy.port}"
+              proxyuser="${proxy.user}" proxypassword="${proxy.pass}"/>
 
-        <taskdef resource="net/sf/antcontrib/antlib.xml"
-                 uri="antlib:net.sf.antcontrib"
-                 classpathref="classpath.ant-contrib"/>
-    </target>
-    
-    <target name="-init-dataloader" depends="-init-ivy">
-        <ivy:cachepath  organisation="com.force"
-                        module="dataloader"
-                        revision="29.0.0"
-                        pathid="classpath.dataloader"
-                        inline="true"/>
-        
-        <ivy:cachepath  organisation="org.eclipse.swt"
-                        module="org.eclipse.swt.win32.win32.x86"
-                        revision="4.3"
-                        pathid="classpath.swt"
-                        inline="true"/>
-    </target>
+    <property name="sfdc.proxyHost" value="${proxy.host}"/>
+    <property name="sfdc.proxyPort" value="${proxy.port}"/>
+    <property name="sfdc.proxyUsername" value="${proxy.user}}"/>
 
-    <target name="-init-ivy" depends="-download-ivy">
-        <!--
-        Try to load ivy here from ivy home, in case the user has not already dropped
-        it into ant's lib dir (note that the latter copy will always take precedence)
-        We will not fail as long as local lib dir exists (it may be empty) and
-        ivy is in at least one of ant's lib dir or the local lib dir.
-        -->
-        <path id="classpath.ivy">
-            <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
-        </path>
+    <encryptProperty name="sfdc.proxyPassword" value="${proxy.pass}"/>
+  </target>
 
-        <taskdef resource="org/apache/ivy/ant/antlib.xml"
-                 uri="antlib:org.apache.ivy.ant"
-                 classpathref="classpath.ivy"/>
+  <target name="deploy" depends="deploy-code, load-data"/>
 
-        <ivy:settings file="${ivy.home}/ivysettings.xml"/>
-    </target>
+  <!-- Shows deploying code & running tests for code in directory -->
+  <target name="deploy-code" depends="-init-migration-tool">
+    <!-- Upload the contents of the "src" directory, running the tests for just 1 class  -->
+    <sf:deploy   username="${sf.username}"
+                 password="${sf.password}"
+                 serverurl="${sf.serverurl}"
+                 maxPoll="${sf.maxPoll}"
+                 pollWaitMillis="${sf.pollWaitMillis}"
+                 deployRoot="src">
+      <runTest>CaseMatcherTests</runTest>
+    </sf:deploy>
+  </target>
 
-    <target name="-init-migration-tool" depends="-init-ivy">
-        <ivy:cachepath  organisation="com.salesforce"
-                        module="ant-salesforce"
-                        revision="24.0.0" 
-                        pathid="classpath.ant-salesforce"
-                        inline="true"/>
-
-        <taskdef resource="com/salesforce/antlib.xml"
-                 uri="antlib:com.salesforce" 
-                 classpathref="classpath.ant-salesforce"/>
-    </target>
-    
-    <target name="-init-load" depends="-init-dataloader, -init-contrib, -set-proxy">       
-        <property name="sf.dataloader.conf" value="${basedir}/data/conf"/>
-
-        <property name="sfdc.username" value="${sf.username}"/>
-        <encryptProperty name="sfdc.password" value="${sf.password}"/>
-
-        <property name="sfdc.endpoint" value="${sf.serverurl}/services/Soap/u/${sf.api}"/>
-
-        <echoproperties destfile="${sf.dataloader.conf}/config.properties" prefix="sfdc"/>
-    </target>
-    
-    <target name="-probe-proxy">
-        <condition property="proxy.enabled">
-            <and>
-                <isset property="proxy.host"/>
-                <isreachable host="${proxy.host}"/>
-            </and>
-        </condition>
-    </target>
-    
-    <target name="-set-proxy" depends="-init-dataloader, -init-contrib, -probe-proxy" if="proxy.enabled">
-        <property name="proxy.port" value="80"/>
-        <property name="proxy.user" value=""/>
-        <property name="proxy.pass" value=""/>
-
-        <setproxy proxyhost="${proxy.host}" proxyport="${proxy.port}"
-                  proxyuser="${proxy.user}" proxypassword="${proxy.pass}"/>
-
-        <property name="sfdc.proxyHost" value="${proxy.host}"/>
-        <property name="sfdc.proxyPort" value="${proxy.port}"/>
-        <property name="sfdc.proxyUsername" value="${proxy.user}}"/>
-
-        <encryptProperty name="sfdc.proxyPassword" value="${proxy.pass}"/>
-    </target>
-    
-    <target name="deploy" depends="deploy-code, load-data"/>
-       
-    <!-- Shows deploying code & running tests for code in directory -->
-    <target name="deploy-code" depends="-init-migration-tool">
-        <!-- Upload the contents of the "src" directory, running the tests for just 1 class  -->
-        <sf:deploy   username="${sf.username}"
+  <target name="list-custom-object" depends="-init-migration-tool">
+    <mkdir dir="${basedir}/test"/>
+    <sf:listMetadata username="${sf.username}"
                      password="${sf.password}"
                      serverurl="${sf.serverurl}"
-                     maxPoll="${sf.maxPoll}"
-                     pollWaitMillis="${sf.pollWaitMillis}"
-                     deployRoot="src">
-            <runTest>CaseMatcherTests</runTest>
-        </sf:deploy>
-    </target>
-    
-    <target name="list-custom-object" depends="-init-migration-tool">
-        <mkdir dir="${basedir}/test"/>
-        <sf:listMetadata username="${sf.username}"
-                         password="${sf.password}"
-                         serverurl="${sf.serverurl}"
-                         metadataType="CustomObject"
-                         resultFilePath="${basedir}/test/list-custom-object.txt"/>
-    </target>
-    
-    <target name="load-data" depends="-init-load">
-        <java classname="com.salesforce.dataloader.process.ProcessRunner">
-            <sysproperty key="salesforce.config.dir" value="${sf.dataloader.conf}"/>
-            <arg value="process.name=Insert_Email_To_Case_Matching_Rules"/>
-            <classpath>
-                <path refid="classpath.dataloader"/>
-                <path refid="classpath.swt"/>
-            </classpath>
-        </java>
-    </target>
-    
-    <!-- Retrieve an unpackaged set of metadata from your org -->
-    <!-- The file src/package.xml lists what is to be retrieved -->
-    <target name="retrieve" depends="-init-migration-tool">
-        <!-- Retrieve the contents into another directory -->
-        <sf:retrieve   username="${sf.username}"
-                       password="${sf.password}"
-                       serverurl="${sf.serverurl}"
-                       maxPoll="${sf.maxPoll}"
-                       pollWaitMillis="${sf.pollWaitMillis}"
-                       retrieveTarget="src"
-                       unpackaged="src/package.xml"/>
-    </target>
-    
-    <!-- Removing metadata -->
-    <target name="undeploy" depends="-init-migration-tool">
-        <sf:deploy   username="${sf.username}"
-                     password="${sf.password}"
-                     serverurl="${sf.serverurl}"
-                     maxPoll="${sf.maxPoll}"
-                     pollWaitMillis="${sf.pollWaitMillis}"
-                     deployRoot="undeploy">
-        </sf:deploy>
-    </target>
+                     metadataType="CustomObject"
+                     resultFilePath="${basedir}/test/list-custom-object.txt"/>
+  </target>
 
-    <macrodef name="encryptProperty">
-        <attribute name="name"/>
-        <attribute name="value"/>
-        <sequential>
-            <java classname="com.salesforce.dataloader.security.EncryptionUtil"
-                  outputproperty="stdout.@{name}">
-                <arg value="-e"/>
-                <arg value="@{value}"/>
-                <classpath>
-                    <path refid="classpath.dataloader"/>
-                </classpath>
-            </java>
+  <target name="load-data" depends="-init-load">
+    <java classname="com.salesforce.dataloader.process.ProcessRunner">
+      <sysproperty key="salesforce.config.dir" value="${sf.dataloader.conf}"/>
+      <arg value="process.name=Insert_Email_To_Case_Matching_Rules"/>
+      <classpath>
+        <path refid="classpath.dataloader"/>
+      </classpath>
+    </java>
+  </target>
 
-            <contrib:propertyregex  property="@{name}"
-                                    input="${stdout.@{name}}"
-                                    regexp="(.*) - (.*)$"
-                                    select="\2" />
-        </sequential>
-    </macrodef>
+  <!-- Retrieve an unpackaged set of metadata from your org -->
+  <!-- The file src/package.xml lists what is to be retrieved -->
+  <target name="retrieve" depends="-init-migration-tool">
+    <!-- Retrieve the contents into another directory -->
+    <sf:retrieve   username="${sf.username}"
+                   password="${sf.password}"
+                   serverurl="${sf.serverurl}"
+                   maxPoll="${sf.maxPoll}"
+                   pollWaitMillis="${sf.pollWaitMillis}"
+                   retrieveTarget="src"
+                   unpackaged="src/package.xml"/>
+  </target>
+
+  <!-- Removing metadata -->
+  <target name="undeploy" depends="-init-migration-tool">
+    <sf:deploy   username="${sf.username}"
+                 password="${sf.password}"
+                 serverurl="${sf.serverurl}"
+                 maxPoll="${sf.maxPoll}"
+                 pollWaitMillis="${sf.pollWaitMillis}"
+                 deployRoot="undeploy">
+    </sf:deploy>
+  </target>
+
+  <macrodef name="encryptProperty">
+    <attribute name="name"/>
+    <attribute name="value"/>
+    <sequential>
+      <java classname="com.salesforce.dataloader.security.EncryptionUtil"
+            outputproperty="stdout.@{name}">
+        <arg value="-e"/>
+        <arg value="@{value}"/>
+        <classpath>
+          <path refid="classpath.dataloader"/>
+        </classpath>
+      </java>
+
+      <contrib:propertyregex  property="@{name}"
+                              input="${stdout.@{name}}"
+                              regexp="(.*) - (.*)$"
+                              select="\2" />
+    </sequential>
+  </macrodef>
 </project>
