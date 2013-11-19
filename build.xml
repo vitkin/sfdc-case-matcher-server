@@ -141,6 +141,14 @@
       </classpath>
     </java>
   </target>
+  
+  <target name="make-pom" depends="-init-ivy">
+    <ivy:makepom ivyfile="${basedir}/ivy.xml" 
+                 pomfile="${basedir}/pom.xml">
+      <mapping conf="default" 
+               scope="compile"/>
+    </ivy:makepom>
+  </target>
 
   <!-- Retrieve an unpackaged set of metadata from your org -->
   <!-- The file src/package.xml lists what is to be retrieved -->
