@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>vitkin.sfdc</groupId>
+  <artifactId>sfdc-case-matcher-server</artifactId>
+  <packaging>pom</packaging>
+  <version>1.0</version>
+  <dependencies>
+    <dependency>
+      <groupId>ant-contrib</groupId>
+      <artifactId>ant-contrib</artifactId>
+      <version>1.0b3</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>com.force</groupId>
+      <artifactId>dataloader</artifactId>
+      <version>29.0.0</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.swt</groupId>
+      <artifactId>org.eclipse.swt.win32.win32.x86</artifactId>
+      <version>4.3</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>com.salesforce</groupId>
+      <artifactId>ant-salesforce</artifactId>
+      <version>24.0.0</version>
+      <optional>true</optional>
+    </dependency>
+  </dependencies>
+</project>

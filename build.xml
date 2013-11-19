@@ -25,6 +25,7 @@
   <property name="ivy.settings.file" value="${ivy.home}/ivysettings.xml"/>
   <property name="ivy.jar.dir" value="${ivy.home}/lib"/>
   <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar"/>
+  <property name="ivy.dep.file" value="${basedir}/pom.xml"/>
 
   <target name="-download-ivy" unless="offline">
     <mkdir dir="${ivy.home}"/>
@@ -35,17 +36,9 @@
   </target>
 
   <target name="-init-contrib" depends="-init-ivy">
-    <ivy:cachepath  conf="ant-contrib"
-                    pathid="classpath.ant-contrib"/>
-
     <taskdef resource="net/sf/antcontrib/antlib.xml"
              uri="antlib:net.sf.antcontrib"
-             classpathref="classpath.ant-contrib"/>
-  </target>
-
-  <target name="-init-dataloader" depends="-init-ivy">
-    <ivy:cachepath  conf="dataloader"
-                    pathid="classpath.dataloader"/>
+             classpathref="classpath.optional"/>
   </target>
 
   <target name="-init-ivy" depends="-download-ivy">
@@ -62,18 +55,18 @@
     <taskdef resource="org/apache/ivy/ant/antlib.xml"
              uri="antlib:org.apache.ivy.ant"
              classpathref="classpath.ivy"/>
+    
+    <ivy:cachepath  conf="optional"
+                    pathid="classpath.optional"/>
   </target>
 
   <target name="-init-migration-tool" depends="-init-ivy">
-    <ivy:cachepath  conf="ant-salesforce"
-                    pathid="classpath.ant-salesforce"/>
-
     <taskdef resource="com/salesforce/antlib.xml"
              uri="antlib:com.salesforce" 
-             classpathref="classpath.ant-salesforce"/>
+             classpathref="classpath.optional"/>
   </target>
 
-  <target name="-init-load" depends="-init-dataloader, -init-contrib, -set-proxy">
+  <target name="-init-load" depends="-init-ivy, -init-contrib, -set-proxy">
     <property name="sf.dataloader.conf" value="${basedir}/data/conf"/>
 
     <property name="sfdc.username" value="${sf.username}"/>
@@ -93,7 +86,7 @@
     </condition>
   </target>
 
-  <target name="-set-proxy" depends="-init-dataloader, -init-contrib, -probe-proxy" if="proxy.enabled">
+  <target name="-set-proxy" depends="-init-ivy, -init-contrib, -probe-proxy" if="proxy.enabled">
     <property name="proxy.port" value="80"/>
     <property name="proxy.user" value=""/>
     <property name="proxy.pass" value=""/>
@@ -137,7 +130,7 @@
       <sysproperty key="salesforce.config.dir" value="${sf.dataloader.conf}"/>
       <arg value="process.name=Insert_Email_To_Case_Matching_Rules"/>
       <classpath>
-        <path refid="classpath.dataloader"/>
+        <path refid="classpath.optional"/>
       </classpath>
     </java>
   </target>
@@ -183,7 +176,7 @@
         <arg value="-e"/>
         <arg value="@{value}"/>
         <classpath>
-          <path refid="classpath.dataloader"/>
+          <path refid="classpath.optional"/>
         </classpath>
       </java>
 
