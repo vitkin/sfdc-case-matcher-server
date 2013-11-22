@@ -5,8 +5,7 @@
          default="retrieve"
          basedir="."
          xmlns:artifact="antlib:org.apache.maven.artifact.ant"
-         xmlns:sf="antlib:com.salesforce"
-         xmlns:contrib="antlib:net.sf.antcontrib">
+         xmlns:sf="antlib:com.salesforce">
 
   <property file="build.properties"/>
   <property environment="env"/>
@@ -25,46 +24,55 @@
   <property name="m2.jar.dir" value="${m2.home}/lib/ant"/>
   <property name="m2.jar.file" value="${m2.jar.dir}/maven-ant-tasks-${m2.install.version}.jar"/>
   
-  <target name="-download-m2" unless="offline">
+  <target name="-can-download-m2" unless="mvn.compile.classpath">
+    <condition property="m2.download">
+      <not>
+        <or>
+          <available file="${m2.jar.file}"/>
+          <isset property="offline"/>
+        </or>
+      </not>
+    </condition>
+  </target>
+  
+  <target name="-download-m2" depends="-can-download-m2" if="m2.download">
     <mkdir dir="${m2.home}"/>
     <mkdir dir="${m2.jar.dir}"/>
     <!-- download Maven Ant Tasks from web site so that it can be used even without any special installation -->
     <get src="${m2.repo.url}/org/apache/maven/maven-ant-tasks/${m2.install.version}/maven-ant-tasks-${m2.install.version}.jar"
          dest="${m2.jar.file}" usetimestamp="true"/>
   </target>
-
-  <target name="-init-contrib" depends="-init-m2">
-    <taskdef resource="net/sf/antcontrib/antlib.xml"
-             uri="antlib:net.sf.antcontrib"
-             classpathref="classpath.optional"/>
-  </target>
-
-  <target name="-init-m2" depends="-download-m2">
+  
+  <target name="-can-init-m2" depends="-download-m2" unless="mvn.compile.classpath">
     <!--
     Try to load Maven Ant Tasks here from m2 home, in case the user has not already dropped
     it into ant's lib dir (note that the latter copy will always take precedence)
     We will not fail as long as local lib dir exists (it may be empty) and
     Maven Ant Tasks is in at least one of ant's lib dir or the local lib dir.
     -->
-    <path id="classpath.m2" path="${m2.jar.file}"/>
+    <path id="m2.classpath" path="${m2.jar.file}"/>
     
     <typedef resource="org/apache/maven/artifact/ant/antlib.xml"
              uri="antlib:org.apache.maven.artifact.ant"
-             classpathref="classpath.m2"/>
+             classpathref="m2.classpath"/>
     
     <artifact:pom id="pom" file="${basedir}/pom.xml"/>
     
-    <artifact:dependencies pathId="classpath.optional" pomRefId="pom"/>
+    <artifact:dependencies pathId="maven.compile.classpath" pomRefId="pom"/>
+  </target>
+  
+  <target name="-init-m2" depends="-can-init-m2" if="mvn.compile.classpath">
+    <path id="maven.compile.classpath" path="${mvn.compile.classpath}"/>
   </target>
 
   <target name="-init-migration-tool" depends="-init-m2">
     <taskdef resource="com/salesforce/antlib.xml"
              uri="antlib:com.salesforce" 
-             classpathref="classpath.optional"/>
+             classpathref="maven.compile.classpath"/>
   </target>
 
-  <target name="-init-load" depends="-init-m2, -init-contrib, -set-proxy">
-    <property name="sf.dataloader.conf" value="${basedir}/data/conf"/>
+  <target name="-init-load" depends="-init-m2, -set-proxy">
+    <property name="sf.dataloader.conf" value="${basedir}/data"/>
 
     <property name="sfdc.username" value="${sf.username}"/>
     <encryptProperty name="sfdc.password" value="${sf.password}"/>
@@ -83,7 +91,7 @@
     </condition>
   </target>
 
-  <target name="-set-proxy" depends="-init-m2, -init-contrib, -probe-proxy" if="proxy.enabled">
+  <target name="-set-proxy" depends="-init-m2, -probe-proxy" if="proxy.enabled">
     <property name="proxy.port" value="80"/>
     <property name="proxy.user" value=""/>
     <property name="proxy.pass" value=""/>
@@ -123,12 +131,12 @@
   </target>
 
   <target name="load-data" depends="-init-load">
-    <java classname="com.salesforce.dataloader.process.ProcessRunner">
+    <java classname="com.salesforce.dataloader.process.ProcessRunner"
+          classpathref="maven.compile.classpath"
+          failonerror="true">
+      <sysproperty key="user.dir" value="${sf.dataloader.conf}"/>
       <sysproperty key="salesforce.config.dir" value="${sf.dataloader.conf}"/>
       <arg value="process.name=Insert_Email_To_Case_Matching_Rules"/>
-      <classpath>
-        <path refid="classpath.optional"/>
-      </classpath>
     </java>
   </target>
 
@@ -161,18 +169,15 @@
     <attribute name="value"/>
     <sequential>
       <java classname="com.salesforce.dataloader.security.EncryptionUtil"
-            outputproperty="stdout.@{name}">
+            outputproperty="@{name}"
+            classpathref="maven.compile.classpath"
+            fork="true"
+            failonerror="true"
+            logError="true">
+        <jvmarg value="-Dlog4j.configuration=file:data/encryption.log4j.xml"/>
         <arg value="-e"/>
         <arg value="@{value}"/>
-        <classpath>
-          <path refid="classpath.optional"/>
-        </classpath>
       </java>
-
-      <contrib:propertyregex  property="@{name}"
-                              input="${stdout.@{name}}"
-                              regexp="(.*) - (.*)$"
-                              select="\2" />
     </sequential>
   </macrodef>
 </project>

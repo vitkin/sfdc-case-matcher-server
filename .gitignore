@@ -2,7 +2,11 @@
 
 ### Customs ###
 log/
+test/
 config.properties
+
+### Maven ###
+target/
 
 ### NetBeans ###
 /nbproject/private/

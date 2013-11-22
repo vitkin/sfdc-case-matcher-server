@@ -36,8 +36,8 @@ The Apache Maven Ant Tasks based dependencies are actually Apache Maven artifact
 * [Eclipse dependencies](https://github.com/forcedotcom/dataloader/tree/29.0.0/local-proj-repo/org/eclipse)
   * **Coordinates:**
     - **Core Commands:** `org.eclipse:core.commands:3.6.1.v20120521-2329`
-    - **Equinox Common:** `org.eclipse:equinox.common:3.6.100.v20120522-1841`
     - **JFace:** `org.eclipse:jface:3.8.0.v20120521-2329`
+    - **SWT:** `org.eclipse:swt-*:4.2`
 
   * **Note:** You just need to download those JARs and place them at the right
     location in the defined Maven repository.  
@@ -46,10 +46,6 @@ The Apache Maven Ant Tasks based dependencies are actually Apache Maven artifact
 
 #### Publicly available:
 
-* [Ant-Contrib 1.0b3](http://ant-contrib.sourceforge.net/)
-  * **Coordinates:**
-    - **Ant-Contrib:** `ant-contrib:ant-contrib:1.0b3`
-
 * [Force.com Partner WSC](https://github.com/forcedotcom/wsc)
   * **Coordinates:**
     - **Partner API:** `com.force.api:force-partner-api:29.0.0`
@@ -57,7 +53,9 @@ The Apache Maven Ant Tasks based dependencies are actually Apache Maven artifact
 
 ### Optional
 
-* [Force.com IDE](http://wiki.developerforce.com/page/Force.com_IDE_Installation)
+* [Force.com IDE](http://wiki.developerforce.com/page/Force.com_IDE_Installation)  
+  This project includes the Eclipse *Force.com IDE* nature and complies with the folders structure of
+  *Force.com IDE* projects.
 * [Salesforce Data Loader CLI quickstart 2.3.0 beta](http://code.google.com/p/dataloadercliq/)
 
 ## Setting the project
@@ -90,12 +88,22 @@ sf.pollWaitMillis = 10000
 ```
 
 ## Installing to your organization
-Just run the command `ant deploy`.
+* Using `ant`:
+  Run the command `ant deploy`.
+
+* Using `maven`:
+  Run the command `mvn`.
 
 ## Removing from your organization
-1. Run the command `ant undeploy`.
-2. From Salesforce `Setup > Build > Create > Custom Labels`, delete the custom
-label `EmailToCaseThreadIdFormat`.
+* Using `ant`:
+  1. Run the command `ant undeploy`.
+  2. From Salesforce `Setup > Build > Create > Custom Labels`, delete the custom
+     label `EmailToCaseThreadIdFormat`.
+
+* Using `maven`:
+  1. Run the command `mvn clean`.
+  2. From Salesforce `Setup > Build > Create > Custom Labels`, delete the custom
+     label `EmailToCaseThreadIdFormat`.
 
 > ### <a name="notes"/>Notes:
 > You may need to either download or compile non publicly available JARs
