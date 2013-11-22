@@ -1,13 +1,13 @@
 ## Prerequisites
 
-This project is based on Apache Ant 1.7 and Apache Ivy 2.3.
-The dependency to Apache Ivy is standalone meaning that Apache Ivy will be
-automatically installed under `.ivy2` under your user home folder
-(i.e. `~/.ivy2/` on *nix or `%USERPROFILE%\.ivy2\` on Windows).
+This project is based on Apache Ant 1.7 and Maven Ant Tasks 2.1.3.
+The dependency to Maven Ant Tasks is standalone meaning that Maven Ant Tasks will be
+automatically installed under `.m2` under your user home folder
+(i.e. `~/.m2/` on *nix or `%USERPROFILE%\.m2\` on Windows).
 
 ### Maven dependencies
 
-The Apache Ivy based dependencies are actually Apache Maven artifacts.
+The Apache Maven Ant Tasks based dependencies are actually Apache Maven artifacts.
 
 #### Not publicly available: (See the [Notes](#notes) section)
 
@@ -101,24 +101,54 @@ label `EmailToCaseThreadIdFormat`.
 > You may need to either download or compile non publicly available JARs
 > and place or deploy them to an accessible Maven repository at the right
 > location based on their coordinates and that is referenced in your
-> `~/.ivy2/ivysettings.xml` or `%USERPROFILE%\.ivy2\ivysettings.xml`.
+> `~/.m2/settings.xml` or `%USERPROFILE%\.m2\settings.xml`.
 > 
-> #### Example of 'ivysettings.xml'
+> #### Example of 'settings.xml'
 >
 > ```XML
 > <?xml version="1.0" encoding="UTF-8"?>
-> <ivysettings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
->              xsi:noNamespaceSchemaLocation="http://svn.apache.org/repos/asf/openmeetings/tags/2.1RC3> /ivysettings.xsd">
->   <settings defaultResolver="myResolver" />
->   <resolvers>
->     <chain name="myResolver">
->       <ibiblio name="sharedMavenRepo" 
->               m2compatible="true" 
->               root="http://host.domain.tld/shared-maven/repo" />
->       <url name="mavencentral">
->         <artifact pattern="http://repo1.maven.org/maven2/[organisation]/[artifact]-[revision].[ext]" />
->       </url>
->    </chain>
->  </resolvers>
-> </ivysettings>
+> <settings xmlns="http://maven.apache.org/SETTINGS/1.1.0"
+>           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+>           xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd">
+>   <profiles>
+>     <profile>
+>       <id>myProfile</id>
+>       <repositories>
+>         <repository>
+>           <id>central</id>
+>           <name>libs-release</name>
+>           <url>http://host.domain.tld/shared-maven/repo/libs-release</url>
+>           <snapshots>
+>             <enabled>false</enabled>
+>           </snapshots>
+>         </repository>
+>         <repository>
+>           <id>snapshots</id>
+>           <name>libs-snapshot</name>
+>           <url>http://host.domain.tld/shared-maven/repo/libs-snapshot</url>
+>           <snapshots/>
+>         </repository>
+>       </repositories>
+>       <pluginRepositories>
+>         <pluginRepository>
+>           <id>central</id>
+>           <name>plugins-release</name>
+>           <url>http://host.domain.tld/shared-maven/repo/plugins-release</url>
+>           <snapshots>
+>             <enabled>false</enabled>
+>           </snapshots>
+>         </pluginRepository>
+>         <pluginRepository>
+>           <id>snapshots</id>
+>           <name>plugins-snapshot</name>
+>           <url>http://host.domain.tld/shared-maven/repo/plugins-snapshot</url>
+>           <snapshots/>
+>         </pluginRepository>
+>       </pluginRepositories>
+>     </profile>
+>   </profiles>
+>   <activeProfiles>
+>     <activeProfile>myProfile</activeProfile>
+>   </activeProfiles>
+> </settings>
 > ```

@@ -4,7 +4,7 @@
 <project name="SFDC Case Matcher Server"
          default="retrieve"
          basedir="."
-         xmlns:ivy="antlib:org.apache.ivy.ant"
+         xmlns:artifact="antlib:org.apache.maven.artifact.ant"
          xmlns:sf="antlib:com.salesforce"
          xmlns:contrib="antlib:net.sf.antcontrib">
 
@@ -13,60 +13,57 @@
 
   <property name="sf.api" value="29.0"/>
 
-  <property name="m2.repo.url" value="http://repo2.maven.org/maven2"/>
+  <property name="m2.repo.url" value="http://repo1.maven.org/maven2"/>
 
-  <property name="ivy.install.version" value="2.3.0"/>
+  <property name="m2.install.version" value="2.1.3"/>
 
-  <condition property="ivy.home" value="${env.IVY_HOME}">
-    <isset property="env.IVY_HOME"/>
+  <condition property="m2.home" value="${env.M2_HOME}">
+    <isset property="env.M2_HOME"/>
   </condition>
 
-  <property name="ivy.home" value="${user.home}/.ivy2"/>
-  <property name="ivy.settings.file" value="${ivy.home}/ivysettings.xml"/>
-  <property name="ivy.jar.dir" value="${ivy.home}/lib"/>
-  <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar"/>
-  <property name="ivy.dep.file" value="${basedir}/pom.xml"/>
-
-  <target name="-download-ivy" unless="offline">
-    <mkdir dir="${ivy.home}"/>
-    <mkdir dir="${ivy.jar.dir}"/>
-    <!-- download Ivy from web site so that it can be used even without any special installation -->
-    <get src="${m2.repo.url}/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
-         dest="${ivy.jar.file}" usetimestamp="true"/>
+  <property name="m2.home" value="${user.home}/.m2"/>
+  <property name="m2.jar.dir" value="${m2.home}/lib/ant"/>
+  <property name="m2.jar.file" value="${m2.jar.dir}/maven-ant-tasks-${m2.install.version}.jar"/>
+  
+  <target name="-download-m2" unless="offline">
+    <mkdir dir="${m2.home}"/>
+    <mkdir dir="${m2.jar.dir}"/>
+    <!-- download Maven Ant Tasks from web site so that it can be used even without any special installation -->
+    <get src="${m2.repo.url}/org/apache/maven/maven-ant-tasks/${m2.install.version}/maven-ant-tasks-${m2.install.version}.jar"
+         dest="${m2.jar.file}" usetimestamp="true"/>
   </target>
 
-  <target name="-init-contrib" depends="-init-ivy">
+  <target name="-init-contrib" depends="-init-m2">
     <taskdef resource="net/sf/antcontrib/antlib.xml"
              uri="antlib:net.sf.antcontrib"
              classpathref="classpath.optional"/>
   </target>
 
-  <target name="-init-ivy" depends="-download-ivy">
+  <target name="-init-m2" depends="-download-m2">
     <!--
-    Try to load ivy here from ivy home, in case the user has not already dropped
+    Try to load Maven Ant Tasks here from m2 home, in case the user has not already dropped
     it into ant's lib dir (note that the latter copy will always take precedence)
     We will not fail as long as local lib dir exists (it may be empty) and
-    ivy is in at least one of ant's lib dir or the local lib dir.
+    Maven Ant Tasks is in at least one of ant's lib dir or the local lib dir.
     -->
-    <path id="classpath.ivy">
-      <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
-    </path>
-
-    <taskdef resource="org/apache/ivy/ant/antlib.xml"
-             uri="antlib:org.apache.ivy.ant"
-             classpathref="classpath.ivy"/>
+    <path id="classpath.m2" path="${m2.jar.file}"/>
     
-    <ivy:cachepath  conf="optional"
-                    pathid="classpath.optional"/>
+    <typedef resource="org/apache/maven/artifact/ant/antlib.xml"
+             uri="antlib:org.apache.maven.artifact.ant"
+             classpathref="classpath.m2"/>
+    
+    <artifact:pom id="pom" file="${basedir}/pom.xml"/>
+    
+    <artifact:dependencies pathId="classpath.optional" pomRefId="pom"/>
   </target>
 
-  <target name="-init-migration-tool" depends="-init-ivy">
+  <target name="-init-migration-tool" depends="-init-m2">
     <taskdef resource="com/salesforce/antlib.xml"
              uri="antlib:com.salesforce" 
              classpathref="classpath.optional"/>
   </target>
 
-  <target name="-init-load" depends="-init-ivy, -init-contrib, -set-proxy">
+  <target name="-init-load" depends="-init-m2, -init-contrib, -set-proxy">
     <property name="sf.dataloader.conf" value="${basedir}/data/conf"/>
 
     <property name="sfdc.username" value="${sf.username}"/>
@@ -86,7 +83,7 @@
     </condition>
   </target>
 
-  <target name="-set-proxy" depends="-init-ivy, -init-contrib, -probe-proxy" if="proxy.enabled">
+  <target name="-set-proxy" depends="-init-m2, -init-contrib, -probe-proxy" if="proxy.enabled">
     <property name="proxy.port" value="80"/>
     <property name="proxy.user" value=""/>
     <property name="proxy.pass" value=""/>
@@ -133,14 +130,6 @@
         <path refid="classpath.optional"/>
       </classpath>
     </java>
-  </target>
-  
-  <target name="make-pom" depends="-init-ivy">
-    <ivy:makepom ivyfile="${basedir}/ivy.xml" 
-                 pomfile="${basedir}/pom.xml">
-      <mapping conf="default" 
-               scope="compile"/>
-    </ivy:makepom>
   </target>
 
   <!-- Retrieve an unpackaged set of metadata from your org -->
